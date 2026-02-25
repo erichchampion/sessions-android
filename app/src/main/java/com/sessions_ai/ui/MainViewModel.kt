@@ -94,7 +94,12 @@ class MainViewModel(
 
         viewModelScope.launch {
             try {
-                val modelConfig = _uiState.value.currentModel ?: return@launch
+                val modelConfig = _uiState.value.currentModel 
+                if (modelConfig == null) {
+                    val botMessage = ChatMessage(ChatMessage.Role.ASSISTANT, "Error: Please download and select a model first.")
+                    _uiState.value = _uiState.value.copy(messages = updatedMessages + botMessage, isGenerating = false)
+                    return@launch
+                }
                 
                 orchestrator.generateReply(updatedMessages, modelConfig).collect { token ->
                     _uiState.value = _uiState.value.copy(
@@ -110,7 +115,12 @@ class MainViewModel(
                 )
 
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(isGenerating = false)
+                val botMessage = ChatMessage(ChatMessage.Role.ASSISTANT, "Error: ${e.message}")
+                _uiState.value = _uiState.value.copy(
+                    messages = updatedMessages + botMessage,
+                    isGenerating = false,
+                    currentGeneration = ""
+                )
                 e.printStackTrace()
             }
         }
