@@ -6,7 +6,6 @@
 
     <application
         android:allowBackup="true"
-        android:extractNativeLibs="true"
         android:label="Sessions-AI"
         android:supportsRtl="true"
         android:largeHeap="true"
