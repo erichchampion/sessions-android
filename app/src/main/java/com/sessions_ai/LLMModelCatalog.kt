@@ -18,9 +18,9 @@ enum class LLMModelID(val stringValue: String) {
             MINISTRAL_8B_INSTRUCT -> "Ministral 3 8B Instruct"
             MISTRAL_7B_INSTRUCT_V03 -> "Mistral 7B Instruct v0.3"
             LLAMA32_1B_INSTRUCT -> "Llama 3.2 1B Instruct"
-            QWEN3_0_6B_INSTRUCT -> "Qwen2.5 0.5B Instruct" // or Qwen3
-            QWEN3_4B_INSTRUCT -> "Qwen2.5 4B Instruct" // or Qwen3
-            QWEN3_8B_INSTRUCT -> "Qwen2.5 8B Instruct" // or Qwen3
+            QWEN3_0_6B_INSTRUCT -> "Qwen3 0.6B Instruct"
+            QWEN3_4B_INSTRUCT -> "Qwen3 4B Instruct"
+            QWEN3_8B_INSTRUCT -> "Qwen3 8B Instruct"
             DEEPSEEK_R1_0528_QWEN3_8B -> "DeepSeek-R1-0528 Qwen3 8B"
             PHI4_MINI_INSTRUCT -> "Phi-4 mini Instruct"
             PHI4_INSTRUCT -> "Phi-4 Instruct"
@@ -90,7 +90,7 @@ data class LLMModelConfiguration(
 }
 
 object LLMModelCatalog {
-    val defaultModelID = LLMModelID.QWEN3_0_6B_INSTRUCT
+    val defaultModelID = LLMModelID.QWEN3_4B_INSTRUCT
     
     val models: Map<LLMModelID, LLMModelConfiguration> = mapOf(
         LLMModelID.MINISTRAL_3B_INSTRUCT to LLMModelConfiguration(
@@ -139,15 +139,29 @@ object LLMModelCatalog {
             id = LLMModelID.QWEN3_4B_INSTRUCT,
             repository = "unsloth/Qwen3-4B-GGUF",
             fileName = "Qwen3-4B-Q4_K_M.gguf",
-            localFileName = "qwen2.5-4b-instruct-q4km.gguf",
-            expectedFileSize = 2500000000L,
+            localFileName = "qwen3-4b-instruct.gguf",
+            expectedFileSize = 2497281312L,
             fileSizeTolerance = 0.05,
             chatTemplate = ChatTemplateFormat.QWEN3,
-            defaultMaxTokens = 1024,
+            defaultMaxTokens = 512,
             defaultTemperature = 0.7,
             contextWindow = 32768,
             license = "Apache 2.0",
             recommended = true
+        ),
+        LLMModelID.QWEN3_8B_INSTRUCT to LLMModelConfiguration(
+            id = LLMModelID.QWEN3_8B_INSTRUCT,
+            repository = "unsloth/Qwen3-8B-GGUF",
+            fileName = "Qwen3-8B-Q4_K_M.gguf",
+            localFileName = "qwen3-8b-instruct.gguf",
+            expectedFileSize = 5027784512L,
+            fileSizeTolerance = 0.05,
+            chatTemplate = ChatTemplateFormat.QWEN3,
+            defaultMaxTokens = 512,
+            defaultTemperature = 0.7,
+            contextWindow = 32768,
+            license = "Apache 2.0",
+            recommended = false
         )
     )
 
