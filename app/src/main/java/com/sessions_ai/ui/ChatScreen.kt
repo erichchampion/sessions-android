@@ -50,12 +50,15 @@ fun ChatScreen(
                 contentPadding = PaddingValues(16.dp)
             ) {
                 items(state.messages) { message ->
-                    MessageBubble(message)
+                    MessageBubble(message = message, isGenerating = false)
                 }
                 
                 if (state.isGenerating) {
                     item {
-                        MessageBubble(ChatMessage(ChatMessage.Role.ASSISTANT, state.currentGeneration))
+                        MessageBubble(
+                            message = ChatMessage(ChatMessage.Role.ASSISTANT, state.currentGeneration), 
+                            isGenerating = true
+                        )
                     }
                 }
             }
@@ -91,7 +94,7 @@ fun ChatScreen(
 }
 
 @Composable
-fun MessageBubble(message: ChatMessage) {
+fun MessageBubble(message: ChatMessage, isGenerating: Boolean) {
     val isUser = message.role == ChatMessage.Role.USER
     Row(
         modifier = Modifier
@@ -108,9 +111,95 @@ fun MessageBubble(message: ChatMessage) {
                 .padding(12.dp)
                 .widthIn(max = 280.dp)
         ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (!isUser) {
+                    val (steps, main) = splitAssistantContent(message.content)
+                    if (steps != null) {
+                        CollapsibleIntermediateStepsView(
+                            stepsContent = steps,
+                            initiallyExpanded = isGenerating
+                        )
+                    }
+                    if (main.isNotEmpty() || steps == null) {
+                        val contentToDisplay = if (steps != null) main else message.content
+                        Text(
+                            text = contentToDisplay,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                } else {
+                    Text(
+                        text = message.content,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun splitAssistantContent(content: String): Pair<String?, String> {
+    val marker = "### Intermediate steps\n\n"
+    val markerIndex = content.indexOf(marker)
+    if (markerIndex == -1) {
+        return Pair(null, content)
+    }
+
+    val afterMarker = content.substring(markerIndex + marker.length)
+    val tripleNewlineIndex = afterMarker.indexOf("\n\n\n")
+
+    if (tripleNewlineIndex != -1) {
+        val steps = afterMarker.substring(0, tripleNewlineIndex).trim()
+        val main = afterMarker.substring(tripleNewlineIndex + 3).trim()
+        return Pair(if (steps.isEmpty()) null else steps, main)
+    }
+
+    val steps = afterMarker.trim()
+    return Pair(if (steps.isEmpty()) null else steps, "")
+}
+
+@Composable
+fun CollapsibleIntermediateStepsView(stepsContent: String, initiallyExpanded: Boolean) {
+    var isExpanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
-                text = message.content,
-                color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+                text = "Intermediate steps",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            TextButton(
+                onClick = { isExpanded = !isExpanded },
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier.height(24.dp)
+            ) {
+                Text(
+                    text = if (isExpanded) "Hide" else "Show",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+        
+        if (isExpanded) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stepsContent,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

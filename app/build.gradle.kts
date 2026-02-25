@@ -72,6 +72,9 @@ dependencies {
     // llama.android official bindings
     implementation(project(":llama"))
     
+    // HTML Parsing
+    implementation("org.jsoup:jsoup:1.17.2")
+    
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     androidTestImplementation(libs.androidx.junit)

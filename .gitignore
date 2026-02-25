@@ -39,3 +39,6 @@ signing.properties
 
 # ===== Google Services (decide by policy) =====
 # google-services.json
+
+# ===== Patch files =====
+*.patch
