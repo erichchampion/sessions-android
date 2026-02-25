@@ -14,10 +14,27 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
+        externalNativeBuild {
+            cmake {
+                arguments += "-DCMAKE_BUILD_TYPE=Release"
+                arguments += "-DCMAKE_MESSAGE_LOG_LEVEL=DEBUG"
+                arguments += "-DCMAKE_VERBOSE_MAKEFILE=ON"
+                arguments += "-DBUILD_SHARED_LIBS=ON"
+                arguments += "-DLLAMA_BUILD_COMMON=ON"
+                arguments += "-DLLAMA_OPENSSL=OFF"
+                arguments += "-DGGML_NATIVE=OFF"
+                arguments += "-DGGML_BACKEND_DL=ON"
+                arguments += "-DGGML_CPU_ALL_VARIANTS=ON"
+                arguments += "-DGGML_LLAMAFILE=OFF"
+            }
         }
     }
 
@@ -28,6 +45,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path("src/main/cpp/CMakeLists.txt")
+            version = "3.31.6"
         }
     }
     compileOptions {
@@ -68,10 +91,7 @@ dependencies {
     // Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.android)
-    
-    // llama.android official bindings
-    implementation(project(":llama"))
-    
+
     // HTML Parsing
     implementation("org.jsoup:jsoup:1.17.2")
     
