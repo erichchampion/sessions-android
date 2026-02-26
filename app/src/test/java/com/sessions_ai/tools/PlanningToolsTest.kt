@@ -13,6 +13,7 @@ class PlanningToolsTest {
     @Before
     fun setup() {
         store = PlanningStore.shared
+        store.setCurrentChat("test-chat")
         store.clearPlan()
     }
 
@@ -31,7 +32,7 @@ class PlanningToolsTest {
 
     @Test
     fun testGetPlanTool() = runBlocking {
-        store.setPlan(Plan(listOf(PlanStep("Do work"))))
+        store.setPlan(Plan(mutableListOf(PlanStep("Do work"))))
         
         val tool = GetPlanTool(store)
         val result = tool.execute(emptyMap())
@@ -41,7 +42,7 @@ class PlanningToolsTest {
 
     @Test
     fun testUpdateStepTool() = runBlocking {
-        store.setPlan(Plan(listOf(PlanStep("Do work"))))
+        store.setPlan(Plan(mutableListOf(PlanStep("Do work"))))
         
         val tool = UpdateStepTool(store)
         val result = tool.execute(mapOf("step_index" to 1, "status" to "in_progress"))

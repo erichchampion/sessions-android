@@ -97,6 +97,8 @@ dependencies {
     
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
+    // Real org.json for unit tests (Android SDK provides stubs that throw "not mocked")
+    testImplementation("org.json:json:20230227")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

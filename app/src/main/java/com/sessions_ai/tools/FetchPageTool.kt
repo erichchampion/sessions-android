@@ -2,7 +2,7 @@ package com.sessions_ai.tools
 
 class FetchPageTool(private val provider: PageContentProvider = PageContentProvider()) : Tool {
     override val name = "fetch_page"
-    override val description = "Get main text from a web page. Use when the user gives a URL to analyze or when you need full article text for a URL found via web_search. Pass \"url\" in args. Prefer web_search for broad queries; use fetch_page when you have a specific URL."
+    override val description = "Use when the user pastes or provides a URL to read, or when you need the full text of a page found via web_search. Pass \"url\" in args. Use web_search for broad queries; use fetch_page only when you have a specific URL to fetch."
     override val schema = mapOf(
         "type" to "object",
         "properties" to mapOf(

@@ -2,7 +2,7 @@ package com.sessions_ai.tools
 
 class CreatePlanTool(private val store: PlanningStore = PlanningStore.shared) : Tool {
     override val name = "create_plan"
-    override val description = "Create a step-by-step plan for a complex, multi-step task. Use when the request cannot be answered with a single tool call. Pass \"steps\" (array of step titles). Call this first before other tools for essays, research, or multi-part tasks."
+    override val description = "Use when the user asks for a multi-step task: essay, research, report, or anything that needs several steps. Call this first with \"steps\" (array of step titles, e.g. [\"Research topic\", \"Draft outline\", \"Write sections\"]). Then use get_plan and update_step as you work through each step."
     override val schema = mapOf(
         "type" to "object",
         "properties" to mapOf(
@@ -15,10 +15,15 @@ class CreatePlanTool(private val store: PlanningStore = PlanningStore.shared) : 
     )
 
     override suspend fun execute(args: Map<String, Any>): String {
-        val stepsArg = args["steps"] ?: return "Error: missing \"steps\" argument. Pass an array of step titles, e.g. {\"steps\": [\"Step 1\", \"Step 2\"]}."
-        val plan = Plan.from(stepsArg) ?: return "Error: \"steps\" must be a non-empty array of strings."
+        val stepsArg = args["steps"] ?: args["step_titles"] ?: args["stepTitles"]
+            ?: return "Error: missing \"steps\" argument. Pass an array of step titles, e.g. {\"steps\": [\"Step 1\", \"Step 2\"]} or {\"name\":\"create_plan\",\"steps\":[\"Step 1\",\"Step 2\"]}."
+        val plan = Plan.from(stepsArg)
+            ?: return "Error: \"steps\" must be a non-empty array of strings (e.g. [\"Research\", \"Draft\", \"Write\"])."
         
         store.setPlan(plan)
+        if (store.getPlan() == null) {
+            return "Error: No chat selected. The plan was not saved. Create or select a chat first, then call create_plan again with your steps."
+        }
         val steps = plan.steps
         val lines = steps.mapIndexed { index, step -> "${index + 1}. [pending] ${step.title}" }
         return "Plan created with ${steps.size} step(s):\n" + lines.joinToString("\n")
@@ -27,7 +32,7 @@ class CreatePlanTool(private val store: PlanningStore = PlanningStore.shared) : 
 
 class GetPlanTool(private val store: PlanningStore = PlanningStore.shared) : Tool {
     override val name = "get_plan"
-    override val description = "Get the current plan for this chat (numbered steps and status). No args. Use to see progress before continuing or before calling update_step."
+    override val description = "Get the current plan (numbered steps and status). No args. Call when a plan exists and you need to see progress or before calling update_step to mark a step completed."
     override val schema = mapOf("type" to "object", "properties" to emptyMap<String, Any>())
 
     override suspend fun execute(args: Map<String, Any>): String {
@@ -43,7 +48,7 @@ class GetPlanTool(private val store: PlanningStore = PlanningStore.shared) : Too
 
 class UpdateStepTool(private val store: PlanningStore = PlanningStore.shared) : Tool {
     override val name = "update_step"
-    override val description = "Update a plan step's status. Use when you start or finish a step. Pass step_index (1-based) and status (pending, in_progress, completed, error). Call update_step(completed) for the active step before send_message when a plan exists. Use error when a step fails."
+    override val description = "Update a plan step's status. Pass step_index (1-based) and status: pending, in_progress, completed, or error. Call update_step with completed when you finish a step; use error if a step fails. Call before replying to the user when a plan exists."
     override val schema = mapOf(
         "type" to "object",
         "properties" to mapOf(

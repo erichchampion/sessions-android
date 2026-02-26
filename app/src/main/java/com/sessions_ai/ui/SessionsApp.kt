@@ -19,7 +19,12 @@ fun SessionsApp() {
             ChatScreen(
                 state = uiState,
                 onSendMessage = { viewModel.sendMessage(it) },
-                onNavigateSettings = { navController.navigate("settings") }
+                onNavigateSettings = { navController.navigate("settings") },
+                onLoadSelectedChat = { viewModel.loadSelectedChat(it) },
+                onSelectNewChat = { viewModel.selectNewChat() },
+                onDeleteChat = { viewModel.deleteChat(it) },
+                onRenameChat = { path, name -> viewModel.renameChat(path, name) },
+                onRegeneratePlan = { viewModel.clearCurrentPlan() }
             )
         }
         composable("settings") {
